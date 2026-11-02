@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="site.css?v=20261102b">
 </head>
 <body>
   <header class="hero">
@@ -70,9 +70,20 @@
 
   <footer>GDG on Campus · MIT ACSC, Alandi · GCLC 2026</footer>
 
+  <script>
+    // If something fails to load (bad network, old cached files), tell the visitor instead of spinning forever.
+    setTimeout(function () {
+      var u = document.getElementById("updated");
+      if (u && u.textContent === "Loading…") {
+        var s = document.getElementById("status"), l = document.getElementById("list");
+        if (l) l.innerHTML = "";
+        if (s) { s.hidden = false; s.innerHTML = 'Taking longer than usual. <a href="" onclick="location.reload(true);return false">Tap to reload</a>'; }
+      }
+    }, 12000);
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/csv-core.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/config.js?v=20261102b"></script>
+  <script src="js/csv-core.js?v=20261102b"></script>
+  <script src="js/app.js?v=20261102b"></script>
 </body>
 </html>
