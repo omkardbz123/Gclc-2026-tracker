@@ -1,7 +1,10 @@
 (function () {
   "use strict";
   const C = window.SITE_CONFIG;
-  const $ = id => document.getElementById(id);
+  // Missing elements return a detached stub, so one script serves both the login page and the setup page.
+  const $ = id => document.getElementById(id) || document.createElement("div");
+  const IS_SETUP = document.body.dataset.page === "setup";
+  const KEY_URL = new URL("key.json", document.currentScript.src).href.split("?")[0];
   const API = "https://api.github.com/repos/" + C.owner + "/" + C.repo;
   const ITER = 600000;
 
@@ -14,7 +17,7 @@
   const esc = s => String(s == null ? "" : s)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   function msg(el, kind, text) { $(el).innerHTML = text ? '<div class="msg ' + kind + '">' + text + "</div>" : ""; }
-  function show(id) { ["login", "setup", "upload"].forEach(p => { $(p).hidden = p !== id; }); }
+  function show(id) { ["login", "setup", "upload", "notready"].forEach(p => { $(p).hidden = p !== id; }); }
 
   // ---------- crypto: the GitHub token is stored encrypted with username + password ----------
   const enc = new TextEncoder(), dec = new TextDecoder();
@@ -89,7 +92,7 @@
   // ---------- startup ----------
   async function loadKey() {
     try {
-      const r = await fetch("key.json?t=" + Date.now(), { cache: "no-store" });
+      const r = await fetch(KEY_URL + "?t=" + Date.now(), { cache: "no-store" });
       if (!r.ok) return null;
       const j = await r.json();
       return j && j.ct ? j : null;
@@ -99,12 +102,11 @@
   let keyBlob = null;
   (async function init() {
     keyBlob = await loadKey();
-    if (keyBlob) { show("login"); $("l-user").focus(); }
-    else { show("setup"); }
+    if (IS_SETUP) { show("setup"); $("s-user").focus(); }
+    else if (keyBlob) { show("login"); $("l-user").focus(); }
+    else { show("notready"); }
   })();
 
-  $("to-setup").onclick = () => { $("to-login").hidden = false; show("setup"); };
-  $("to-login").onclick = () => show("login");
 
   // ---------- setup ----------
   $("setup-form").addEventListener("submit", async e => {
@@ -121,8 +123,8 @@
       await commitFiles([{ path: C.keyPath, content: JSON.stringify(blob, null, 2) + "\n" }], "Update admin access");
       keyBlob = blob;
       $("s-token").value = ""; $("s-pass").value = "";
-      msg("setup-msg", "ok", "Saved. You're signed in.");
-      enterUpload();
+      msg("setup-msg", "ok", 'Done! From now on, admins only need the username and password. <a href="../">Go to admin sign-in →</a> (works in about a minute)');
+      $("setup-form").reset();
     } catch (err) {
       token = null;
       msg("setup-msg", "err", friendly(err));
@@ -136,7 +138,7 @@
     msg("login-msg", "info", "Signing in…");
     try {
       if (!keyBlob) keyBlob = await loadKey();
-      if (!keyBlob) { show("setup"); return; }
+      if (!keyBlob) { show("notready"); return; }
       let tok;
       try { tok = await decryptToken($("l-user").value, $("l-pass").value, keyBlob); }
       catch (x) { msg("login-msg", "err", "Wrong username or password."); return; }

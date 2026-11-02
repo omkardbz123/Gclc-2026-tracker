@@ -7,7 +7,7 @@
   <title>GCLC Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../styles.css?v=20261102b">
+  <link rel="stylesheet" href="../styles.css?v=20261102c">
   <style>
     .panel { max-width: 560px; margin: 32px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
     .panel.wide { max-width: 960px; }
@@ -56,31 +56,14 @@
         <label class="field"><span>Username</span><input type="text" id="l-user" autocomplete="username" required></label>
         <label class="field"><span>Password</span><input type="password" id="l-pass" autocomplete="current-password" required></label>
         <div id="login-msg"></div>
-        <div class="row"><button class="btn" type="submit" id="l-btn">Sign in</button><span class="spacer"></span><button type="button" class="linkbtn" id="to-setup">Reset login / token</button></div>
+        <div class="row"><button class="btn" type="submit" id="l-btn">Sign in</button></div>
       </form>
     </section>
 
-    <!-- One-time setup -->
-    <section class="panel" id="setup" hidden>
-      <h2>One-time setup</h2>
-      <p class="lead">Connects this page to the GitHub repo so uploads can be published. Do this once (and again when the token expires).</p>
-      <div class="help">
-        <strong>Create a GitHub token:</strong>
-        <ol>
-          <li>GitHub → Settings → Developer settings → Personal access tokens → <b>Fine-grained tokens</b> → Generate new token.</li>
-          <li>Repository access: <b>Only select repositories</b> → pick <b id="repo-name"></b>.</li>
-          <li>Permissions → Repository permissions → <b>Contents: Read and write</b>. Nothing else.</li>
-          <li>Generate, copy the token, paste it below.</li>
-        </ol>
-        The token is encrypted with the admin password before it is saved, and is never stored in plain text.
-      </div>
-      <form id="setup-form" style="margin-top:16px">
-        <label class="field"><span>Admin username</span><input type="text" id="s-user" required></label>
-        <label class="field"><span>Admin password</span><input type="password" id="s-pass" autocomplete="new-password" required></label>
-        <label class="field"><span>GitHub token</span><input type="password" id="s-token" autocomplete="off" placeholder="github_pat_…" required></label>
-        <div id="setup-msg"></div>
-        <div class="row"><button class="btn" type="submit" id="s-btn">Save setup</button><span class="spacer"></span><button type="button" class="linkbtn" id="to-login" hidden>Back to sign in</button></div>
-      </form>
+    <!-- Shown only before the one-time setup has been done -->
+    <section class="panel" id="notready" hidden>
+      <h2>Admin not ready yet</h2>
+      <p class="lead" style="margin:0">The site owner needs to finish a one-time setup before anyone can sign in.</p>
     </section>
 
     <!-- Upload -->
@@ -117,8 +100,8 @@
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="../js/config.js?v=20261102b"></script>
-  <script src="../js/csv-core.js?v=20261102b"></script>
-  <script src="admin.js?v=20261102b"></script>
+  <script src="../js/config.js?v=20261102c"></script>
+  <script src="../js/csv-core.js?v=20261102c"></script>
+  <script src="admin.js?v=20261102c"></script>
 </body>
 </html>

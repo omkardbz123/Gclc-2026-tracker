@@ -15,12 +15,12 @@ Email and phone columns are removed automatically before anything is published. 
 
 ## One-time setup
 
-The admin page publishes through the GitHub API, so it needs a GitHub token. The first time `/admin/` is opened, it asks for:
+The admin page publishes through the GitHub API, so it needs a GitHub token, entered once on the hidden page `/admin/setup/`:
 
 - an admin username and password
 - a fine-grained GitHub token limited to this repository, with **Contents: Read and write** permission
 
-The token is encrypted with the username and password (PBKDF2 + AES-GCM) and saved as `admin/key.json`. To change the password or replace an expired token, use **Reset login / token** on the sign-in screen.
+The token is encrypted with the username and password (PBKDF2 + AES-GCM) and saved as `admin/key.json`. After that, `/admin/` shows only username and password. To change the password or replace an expired token, open `/admin/setup/` again.
 
 ## Logo
 
