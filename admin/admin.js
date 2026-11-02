@@ -191,12 +191,13 @@
     msg("pub-msg", "", "");
     const parsed = [], lines = [];
     for (const f of list) {
-      if (!/\.csv$/i.test(f.name) && f.type && !/csv|text|excel/i.test(f.type)) {
-        lines.push('<li><span>' + esc(f.name) + '</span><span class="bad">Not a CSV file</span></li>');
+      const isExcel = /\.(xlsx|xls)$/i.test(f.name) || /spreadsheetml|ms-excel/i.test(f.type);
+      if (!isExcel && !/\.csv$/i.test(f.name) && f.type && !/csv|text/i.test(f.type)) {
+        lines.push('<li><span>' + esc(f.name) + '</span><span class="bad">Not an Excel or CSV file</span></li>');
         continue;
       }
       try {
-        const p = CsvCore.parse(await f.text());
+        const p = CsvCore.parse(isExcel ? await excelToCsv(f) : await f.text());
         parsed.push(p);
         lines.push("<li><span>" + esc(f.name) + "</span><span>" + p.rows.length + " rows ✓</span></li>");
       } catch (err) {
@@ -214,6 +215,7 @@
     $("r-dups").textContent = merged.stats.duplicates;
     $("r-cols").textContent = clean.headers.length;
     const notes = [];
+    if (clean.masked) notes.push('<div class="msg info">' + clean.masked + " email address(es) typed into other fields (like the name) were hidden.</div>");
     if (clean.removed.length) notes.push('<div class="msg info">Private columns removed before publishing: <b>' + clean.removed.map(esc).join(", ") + "</b></div>");
     if (parsed.length < list.length) notes.push('<div class="msg warn">Some files had problems and were skipped (see above).</div>');
     if (merged.stats.unkeyed) notes.push('<div class="msg warn">' + merged.stats.unkeyed + " row(s) had no name, email or profile link and were kept as-is.</div>");
@@ -224,6 +226,15 @@
     $("p-body").innerHTML = show5.map(r => "<tr>" + clean.headers.map(h => "<td>" + esc(String(r[h]).slice(0, 60)) + (String(r[h]).length > 60 ? "…" : "") + "</td>").join("") + "</tr>").join("") +
       (clean.rows.length > 5 ? '<tr><td colspan="' + clean.headers.length + '" style="color:var(--muted)">…and ' + (clean.rows.length - 5) + " more</td></tr>" : "");
     $("result").hidden = false;
+  }
+
+  // Read the first sheet of an Excel file as CSV text.
+  async function excelToCsv(file) {
+    if (!window.XLSX) throw new Error("Excel reader didn't load. Check your connection and refresh.");
+    const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+    const name = wb.SheetNames[0];
+    if (!name) throw new Error("The Excel file has no sheets.");
+    return XLSX.utils.sheet_to_csv(wb.Sheets[name], { blankrows: false });
   }
 
   function stamp(d) {

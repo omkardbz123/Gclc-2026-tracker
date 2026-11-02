@@ -242,3 +242,4 @@ footer { text-align: center; color: var(--faint); font-size: 12px; padding: 28px
   .hero { padding-bottom: 72px; }
   .hero h1 { font-size: 38px; }
 }
+.pill.ms { background: color-mix(in srgb, var(--gold) 22%, transparent); color: color-mix(in srgb, var(--gold) 70%, var(--text)); }

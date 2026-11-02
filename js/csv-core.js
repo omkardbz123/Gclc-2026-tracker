@@ -9,7 +9,10 @@
 })(typeof self !== "undefined" ? self : this, function (Papa) {
   "use strict";
 
-  const SENSITIVE = /(e-?mail|phone|mobile|contact\s*no|whatsapp|password|aadhaar|aadhar)/i;
+  // Columns that must never be published. "Access Code" is each participant's personal redemption code.
+  const SENSITIVE = /(e-?mail|phone|mobile|contact\s*no|whatsapp|password|aadhaar|aadhar|^access\s*codes?$)/i;
+  const NA = /^(not applicable|n\/?a|na|-|none|null|nil)$/i;
+  function isNA(v) { return v === "" || v == null || NA.test(String(v).trim()); }
   const URL_COL = /(url|link|profile)/i;
   const NAME_COL = /name/i;
   const NOT_NAME = /(badge|game|lab|course|skill|arcade|college|institute)/i;
@@ -46,7 +49,11 @@
       const line = grid[r];
       if (line.every(v => String(v).trim() === "")) continue;
       const obj = {};
-      headers.forEach((h, i) => { obj[h] = String(line[i] == null ? "" : line[i]).trim(); });
+      headers.forEach((h, i) => {
+        let v = String(line[i] == null ? "" : line[i]).trim();
+        if (/^-?\d+\.0+$/.test(v)) v = v.replace(/\.0+$/, ""); // Excel writes whole numbers as 3.0
+        obj[h] = v;
+      });
       rows.push(obj);
     }
     if (!rows.length) throw new Error("The file has headers but no participant rows.");
@@ -72,7 +79,7 @@
     const sensitive = headers.filter(h => SENSITIVE.test(h));
     const types = {};
     headers.forEach(h => {
-      const vals = rows.map(r => r[h]).filter(v => v !== "");
+      const vals = rows.map(r => r[h]).filter(v => !isNA(v));
       const allNum = vals.length > 0 && vals.every(isNumeric);
       const looksUrl = vals.length > 0 && vals.filter(v => /^https?:\/\//i.test(v)).length >= vals.length * 0.6;
       const avgLen = vals.length ? vals.reduce((a, v) => a + v.length, 0) / vals.length : 0;
@@ -136,16 +143,17 @@
   function stripSensitive(headers, rows) {
     const keep = headers.filter(h => !SENSITIVE.test(h));
     const removed = headers.filter(h => SENSITIVE.test(h));
-    return {
-      headers: keep,
-      rows: rows.map(r => { const o = {}; keep.forEach(h => { o[h] = r[h]; }); return o; }),
-      removed
-    };
+    // Some people type their email into other fields (e.g. as their name). Mask those too.
+    const EMAIL = /[^\s@,;|]+@[^\s@,;|]+\.[^\s@,;|]+/g;
+    let masked = 0;
+    const mask = v => String(v == null ? "" : v).replace(EMAIL, m => { masked++; return m.slice(0, Math.min(3, m.indexOf("@"))) + "•••"; });
+    const out = rows.map(r => { const o = {}; keep.forEach(h => { o[h] = mask(r[h]); }); return o; });
+    return { headers: keep, rows: out, removed, masked };
   }
 
   function toCsv(headers, rows) {
     return Papa.unparse({ fields: headers, data: rows.map(r => headers.map(h => r[h] == null ? "" : r[h])) }, { newline: "\n" }) + "\n";
   }
 
-  return { parse, describe, merge, stripSensitive, toCsv, isNumeric, num, SENSITIVE };
+  return { parse, describe, merge, stripSensitive, toCsv, isNumeric, num, isNA, SENSITIVE };
 });

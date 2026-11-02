@@ -7,7 +7,7 @@
   <title>GCLC Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../styles.css?v=20261102c">
+  <link rel="stylesheet" href="../styles.css?v=20261103a">
   <style>
     .panel { max-width: 560px; margin: 32px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
     .panel.wide { max-width: 960px; }
@@ -69,15 +69,15 @@
     <!-- Upload -->
     <section class="panel wide" id="upload" hidden>
       <div class="row" style="margin-bottom:6px">
-        <h2 style="margin:0">Upload today's CSV</h2><span class="spacer"></span>
+        <h2 style="margin:0">Upload today's sheet</h2><span class="spacer"></span>
         <a class="linkbtn" href="../" target="_blank" rel="noopener">View site ↗</a>
         <button class="btn secondary" id="logout" type="button">Sign out</button>
       </div>
       <p class="lead" id="current">Checking published data…</p>
 
-      <input type="file" id="file" accept=".csv,text/csv" multiple hidden>
+      <input type="file" id="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" multiple hidden>
       <div class="drop" id="drop" tabindex="0" role="button">
-        <strong>Drop CSV file(s) here or tap to choose</strong>
+        <strong>Tap to choose the Excel (.xlsx) or CSV file</strong>
         Uploading several files at once merges them. The same participant is never counted twice.
       </div>
       <ul class="files" id="files"></ul>
@@ -100,8 +100,9 @@
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="../js/config.js?v=20261102c"></script>
-  <script src="../js/csv-core.js?v=20261102c"></script>
-  <script src="admin.js?v=20261102c"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="../js/config.js?v=20261103a"></script>
+  <script src="../js/csv-core.js?v=20261103a"></script>
+  <script src="admin.js?v=20261103a"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@
     return h
       .replace(/google cloud skills boost/ig, "")
       .replace(/^(#|no\.?|number)\s*of\s*/i, "")
-      .replace(/\b(names?\s+of\s+)/ig, "")
+      .replace(/\b(names?\s+of\s+|names?\b)/ig, "")
       .replace(/\b(status|redemption|completed|count)\b/ig, "")
       .replace(/\s{2,}/g, " ").replace(/^[\s\-–:&]+|[\s\-–:&]+$/g, "").trim() || h;
   }
@@ -29,9 +29,10 @@
     const score = metrics.find(h => /(badge|total|score|points|completed)/i.test(h)) || metrics[0] || null;
     if (score) metrics.splice(metrics.indexOf(score), 1), metrics.unshift(score);
     const urlCol = visible.find(h => d.types[h] === "url" && /profile/i.test(h)) || visible.find(h => d.types[h] === "url") || null;
-    const listCols = visible.filter(h => d.types[h] === "long" ||
-      (d.types[h] === "text" && h !== d.nameCol && data.filter(r => / \| /.test(r[h])).length >= Math.max(1, data.length * 0.15)));
-    const statusCols = visible.filter(h => d.types[h] === "status");
+    const listCols = visible.filter(h => h !== d.nameCol && d.types[h] !== "number" && d.types[h] !== "url" &&
+      (d.types[h] === "long" || /(names|badges)/i.test(h) || data.filter(r => / \| /.test(r[h])).length >= Math.max(1, data.length * 0.15)));
+    const statusCols = visible.filter(h => d.types[h] === "status" && !listCols.includes(h));
+    const milestoneCol = statusCols.find(h => /milestone/i.test(h)) || null;
     const completeCol = statusCols.find(h => /\ball\b/i.test(h) && /complet/i.test(h)) || null;
     const otherCols = visible.filter(h => h !== d.nameCol && !metrics.includes(h) && h !== urlCol &&
       !listCols.includes(h) && !statusCols.includes(h) && !serial.test(h));
@@ -40,9 +41,23 @@
       const t = C.targets && C.targets[h];
       max[h] = t || Math.max(1, ...data.map(r => num(r[h])));
     });
-    return { d, nameCol: d.nameCol, score, metrics: metrics.slice(0, 4), urlCol, listCols, statusCols, completeCol, otherCols, max };
+    return { d, nameCol: d.nameCol, score, metrics: metrics.slice(0, 4), urlCol, listCols, statusCols, completeCol, milestoneCol, otherCols, max };
   }
 
+  const NA = v => CsvCore.isNA(v);
+  const hasMilestone = v => !NA(v) && !/^no\b/i.test(String(v).trim());
+  // Items are separated by " | " or ", ". Badge names are multi-word, so a one-word piece
+  // (like "Store" in "Store, Process, and Manage Data…") belongs to the next item.
+  const splitList = v => {
+    if (NA(v)) return [];
+    const parts = String(v).split(/\s*\|\s*|,\s*(?=[A-Z0-9])/).map(x => x.trim()).filter(Boolean);
+    const out = [];
+    for (let i = 0; i < parts.length; i++) {
+      if (!/\s/.test(parts[i]) && i + 1 < parts.length) { parts[i + 1] = parts[i] + ", " + parts[i + 1]; continue; }
+      out.push(parts[i]);
+    }
+    return out;
+  };
   const isYes = v => /^(yes|y|true|done|completed?|1)$/i.test(String(v).trim());
   function tone(v) {
     const s = String(v).toLowerCase();
@@ -84,7 +99,10 @@
       $("s2k").textContent = /badge/i.test(M.score) ? "Badges earned" : "Total " + shortLabel(M.score).toLowerCase();
       $("s3").textContent = vals.filter(v => v > 0).length.toLocaleString();
     }
-    if (M.completeCol) {
+    if (M.milestoneCol) {
+      $("s4").textContent = rows.filter(r => hasMilestone(r[M.milestoneCol])).length.toLocaleString();
+      $("s4k").textContent = "Milestone reached";
+    } else if (M.completeCol) {
       $("s4").textContent = rows.filter(r => isYes(r[M.completeCol])).length.toLocaleString();
       $("s4k").textContent = "Completed all";
     } else if (M.score) {
@@ -128,10 +146,11 @@
   }
 
   function counts() {
-    const c = { all: rows.length, started: 0, idle: 0, done: 0 };
+    const c = { all: rows.length, started: 0, idle: 0, done: 0, ms: 0 };
     rows.forEach(r => {
       if (M.score && num(r[M.score]) > 0) c.started++; else c.idle++;
       if (M.completeCol && isYes(r[M.completeCol])) c.done++;
+      if (M.milestoneCol && hasMilestone(r[M.milestoneCol])) c.ms++;
     });
     return c;
   }
@@ -140,6 +159,7 @@
     const c = counts();
     const chips = [["all", "All", c.all]];
     if (M.score) chips.push(["started", "Started", c.started], ["idle", "Not started", c.idle]);
+    if (M.milestoneCol) chips.push(["ms", "Milestone reached", c.ms]);
     if (M.completeCol) chips.push(["done", "Completed all", c.done]);
     $("chips").innerHTML = chips.map(([k, l, n]) =>
       '<button class="chip" type="button" data-f="' + k + '" aria-pressed="' + (filter === k) + '">' + l + " <b>" + n + "</b></button>"
@@ -155,8 +175,11 @@
     const rc = hasScore && rk <= 3 ? " r" + rk : "";
     const pills = [];
     if (M.completeCol && isYes(r[M.completeCol])) pills.push('<span class="pill good">✓ Completed all</span>');
-    M.statusCols.filter(h => h !== M.completeCol && r[h]).forEach(h => {
-      pills.push('<span class="pill ' + tone(r[h]) + '">' + esc(shortLabel(h)) + ": " + esc(r[h]) + "</span>");
+    if (M.milestoneCol && hasMilestone(r[M.milestoneCol])) pills.push('<span class="pill ms">🏅 ' + esc(r[M.milestoneCol]) + "</span>");
+    M.statusCols.filter(h => h !== M.completeCol && h !== M.milestoneCol && !NA(r[h]) && tone(r[h]) !== "good").forEach(h => {
+      const v = String(r[h]);
+      const label = /access\s*code/i.test(h) && /^no$/i.test(v) ? "Access code not redeemed" : shortLabel(h) + ": " + v;
+      pills.push('<span class="pill ' + tone(v) + '">' + esc(label) + "</span>");
     });
     const link = M.urlCol && /^https?:\/\//i.test(r[M.urlCol])
       ? '<a class="open" href="' + esc(r[M.urlCol]) + '" target="_blank" rel="noopener noreferrer" aria-label="Open profile of ' + esc(r[M.nameCol]) + '">' +
@@ -169,11 +192,15 @@
         ' <small>/ ' + mx + '</small></span></div><div class="bar"><i class="c' + (i + 1) + '" style="width:' + pct.toFixed(1) + '%"></i></div></div>';
     }).join("");
     const lists = M.listCols.map(h => {
-      const items = String(r[h] || "").split(/\s*\|\s*/).map(s => s.trim()).filter(Boolean);
+      const items = splitList(r[h]);
       return items.length ? '<p class="sub-h">' + esc(shortLabel(h)) + '</p><div class="tags">' + items.map(t => '<span class="tag">' + esc(t) + "</span>").join("") + "</div>" : "";
     }).join("");
-    const extra = M.otherCols.filter(h => r[h]).map(h => '<p class="sub-h">' + esc(h) + "</p><div>" + esc(r[h]) + "</div>").join("");
-    const total = M.listCols.reduce((n, h) => n + String(r[h] || "").split("|").filter(s => s.trim()).length, 0);
+    const extra = M.otherCols.filter(h => !NA(r[h])).map(h => {
+      const v = String(r[h]);
+      const body = /^https?:\/\//i.test(v) ? '<a href="' + esc(v) + '" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">Open ↗</a>' : esc(v);
+      return '<p class="sub-h">' + esc(shortLabel(h)) + "</p><div>" + body + "</div>";
+    }).join("");
+    const total = M.listCols.reduce((n, h) => n + splitList(r[h]).length, 0);
     const details = (lists || extra)
       ? '<details><summary><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>' +
         (total ? "View completed (" + total + ")" : "More details") + "</summary>" + lists + extra + "</details>"
@@ -192,6 +219,7 @@
       if (filter === "started" && !(num(r[M.score]) > 0)) return false;
       if (filter === "idle" && num(r[M.score]) > 0) return false;
       if (filter === "done" && !isYes(r[M.completeCol])) return false;
+      if (filter === "ms" && !hasMilestone(r[M.milestoneCol])) return false;
       if (!q) return true;
       return String(r[M.nameCol]).toLowerCase().includes(q) ||
         (M.urlCol && String(r[M.urlCol]).toLowerCase().includes(q));
