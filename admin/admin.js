@@ -191,13 +191,8 @@
     msg("pub-msg", "", "");
     const parsed = [], lines = [];
     for (const f of list) {
-      const isExcel = /\.(xlsx|xls)$/i.test(f.name) || /spreadsheetml|ms-excel/i.test(f.type);
-      if (!isExcel && !/\.csv$/i.test(f.name) && f.type && !/csv|text/i.test(f.type)) {
-        lines.push('<li><span>' + esc(f.name) + '</span><span class="bad">Not an Excel or CSV file</span></li>');
-        continue;
-      }
       try {
-        const p = CsvCore.parse(isExcel ? await excelToCsv(f) : await f.text());
+        const p = CsvCore.parse(await readSheet(f));
         parsed.push(p);
         lines.push("<li><span>" + esc(f.name) + "</span><span>" + p.rows.length + " rows ✓</span></li>");
       } catch (err) {
@@ -228,13 +223,29 @@
     $("result").hidden = false;
   }
 
-  // Read the first sheet of an Excel file as CSV text.
-  async function excelToCsv(file) {
-    if (!window.XLSX) throw new Error("Excel reader didn't load. Check your connection and refresh.");
-    const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
-    const name = wb.SheetNames[0];
-    if (!name) throw new Error("The Excel file has no sheets.");
-    return XLSX.utils.sheet_to_csv(wb.Sheets[name], { blankrows: false });
+  // Turn any spreadsheet file into CSV text. The type is decided from the file's bytes,
+  // not its name, because phones often give downloaded files odd names and types.
+  async function readSheet(file) {
+    const buf = await file.arrayBuffer();
+    const b = new Uint8Array(buf.slice(0, 8));
+    const isZip = b[0] === 0x50 && b[1] === 0x4B;                                   // .xlsx / .ods
+    const isOle = b[0] === 0xD0 && b[1] === 0xCF && b[2] === 0x11 && b[3] === 0xE0; // old .xls
+    const looksExcel = isZip || isOle || /\.(xlsx|xlsm|xls|ods)$/i.test(file.name) || /spreadsheet|excel|opendocument/i.test(file.type);
+    if (looksExcel) {
+      if (!window.XLSX) throw new Error("Excel reader didn't load. Check your internet and refresh the page.");
+      let wb;
+      try { wb = XLSX.read(buf, { type: "array" }); }
+      catch (e) { throw new Error("This Excel file could not be opened. Is it password-protected or damaged?"); }
+      // Use the first sheet that actually has rows.
+      for (const name of wb.SheetNames) {
+        const csv = XLSX.utils.sheet_to_csv(wb.Sheets[name], { blankrows: false });
+        if (csv.replace(/[,\s]/g, "")) return csv;
+      }
+      throw new Error("The Excel file has no data.");
+    }
+    const text = new TextDecoder("utf-8").decode(buf);
+    if (/\u0000/.test(text.slice(0, 2000))) throw new Error("Not an Excel or CSV file.");
+    return text;
   }
 
   function stamp(d) {
