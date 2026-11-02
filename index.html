@@ -2,54 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GCLC 2026 Progress</title>
-  <meta name="description" content="Daily participant progress for Google Cloud Learn With Communities 2026.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GCLC 2026 Leaderboard</title>
+  <meta name="description" content="Daily participant progress for Google Cloud Learn With Communities 2026 · GDG on Campus MIT ACSC.">
+  <meta name="theme-color" content="#1a73e8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a1f45" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="GCLC 2026 Leaderboard">
+  <meta property="og:description" content="Check your Google Cloud skill badge progress.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a73e8'/%3E%3Cpath d='M9 22V14M16 22V9M23 22v-5' stroke='white' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site.css">
 </head>
 <body>
-  <header class="top">
+  <header class="hero">
     <div class="wrap">
-      <img class="logo" src="assets/logo.png" alt="GDG on Campus logo" onerror="this.hidden=true">
-      <div class="brand">
-        <h1 id="title">GCLC 2026 Progress Tracker</h1>
-        <p id="subtitle"></p>
+      <div class="hero-top">
+        <div class="logo-chip">
+          <img id="logo" src="assets/logo.png" alt="GDG on Campus MIT ACSC" onerror="this.hidden=true;document.getElementById('logo-text').hidden=false">
+          <span id="logo-text" hidden>GDG on Campus · MIT ACSC</span>
+        </div>
+        <span class="live"><i></i><span id="updated">Loading…</span></span>
       </div>
+      <p class="eyebrow">Google Cloud · Learn With Communities</p>
+      <h1>GCLC 2026 Leaderboard</h1>
+      <p class="sub">Track your skill badges and arcade progress. Updated daily by the organizing team.</p>
     </div>
   </header>
 
   <main class="wrap">
     <section class="stats" aria-label="Summary">
-      <div class="stat"><div class="k">Participants</div><div class="v" id="s-count">–</div></div>
-      <div class="stat"><div class="k" id="s-total-label">Total</div><div class="v" id="s-total">–</div></div>
-      <div class="stat"><div class="k" id="s-active-label">Started</div><div class="v" id="s-active">–</div></div>
-      <div class="stat"><div class="k">Last updated</div><div class="v small" id="s-updated">–</div></div>
+      <div class="stat"><div class="v" id="s1">–</div><div class="k" id="s1k">Participants</div></div>
+      <div class="stat"><div class="v" id="s2">–</div><div class="k" id="s2k">Badges earned</div></div>
+      <div class="stat"><div class="v" id="s3">–</div><div class="k" id="s3k">Started</div></div>
+      <div class="stat"><div class="v" id="s4">–</div><div class="k" id="s4k">Completed</div></div>
     </section>
 
-    <div class="notice" id="sample-note" hidden>Showing sample data. Real progress will appear after the first upload.</div>
+    <div class="notice" id="sample-note" hidden>Showing sample data. Real progress appears after the first upload.</div>
 
-    <div class="toolbar">
+    <h2 class="section-title" id="pod-title" hidden>Top performers</h2>
+    <section class="podium" id="podium" hidden></section>
+
+    <div class="controls" id="controls">
       <label class="search">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="search" placeholder="Search your name…" autocomplete="off" aria-label="Search participants">
+        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" inputmode="search" enterkeyhint="search" placeholder="Search your name" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search participants">
+        <button class="clear" id="clear" type="button" aria-label="Clear search" hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
       </label>
-      <span class="count" id="count"></span>
+      <div class="chips" id="chips" role="group" aria-label="Filter"></div>
+      <p class="result-line" id="result-line"></p>
     </div>
 
-    <div class="card">
-      <div class="scroller">
-        <table id="table" hidden>
-          <thead><tr id="head"></tr></thead>
-          <tbody id="body"></tbody>
-        </table>
-        <div class="status-msg" id="status">Loading progress…</div>
-      </div>
-    </div>
+    <div class="status-msg" id="status" hidden></div>
+    <ol class="list" id="list" aria-live="polite">
+      <li class="skel"></li><li class="skel"></li><li class="skel"></li>
+    </ol>
+    <div class="empty" id="empty" hidden></div>
+    <div class="more" id="more" hidden><button type="button" id="more-btn">Show more</button></div>
   </main>
 
-  <footer class="wrap">Data is updated daily by the organizing team.</footer>
+  <button class="totop" id="totop" type="button" aria-label="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
+
+  <footer>GDG on Campus · MIT ACSC, Alandi · GCLC 2026</footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="js/config.js"></script>
