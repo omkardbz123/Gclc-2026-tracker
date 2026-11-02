@@ -1,8 +1,7 @@
 {
-  "updatedAt": "2026-11-02T16:49:31.641Z",
-  "participants": 12,
+  "updatedAt": "2026-11-02T17:58:59.769Z",
+  "participants": 237,
   "sourceFiles": [
-    "sample"
-  ],
-  "sample": true
+    "GCLC_Day1.csv"
+  ]
 }
