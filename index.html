@@ -13,77 +13,140 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site.css?v=20261103b">
+  <link rel="stylesheet" href="app.css?v=20261103d">
 </head>
 <body>
-  <header class="hero">
-    <div class="wrap">
-      <div class="hero-top">
-        <div class="logo-chip">
-          <img id="logo" src="assets/logo.png" alt="GDG on Campus MIT ACSC" onerror="this.hidden=true;document.getElementById('logo-text').hidden=false">
-          <span id="logo-text" hidden>GDG on Campus · MIT ACSC</span>
+
+  <!-- ================= HOME ================= -->
+  <section class="view" id="view-home" aria-label="Home">
+    <header class="hero">
+      <div class="wrap">
+        <div class="hero-top">
+          <div class="logo-chip">
+            <img id="logo" src="assets/logo.png" alt="GDG on Campus MIT ACSC" onerror="this.hidden=true;document.getElementById('logo-text').hidden=false">
+            <span id="logo-text" hidden>GDG on Campus · MIT ACSC</span>
+          </div>
+          <span class="live"><i></i><span class="js-updated" data-short="1">Loading…</span></span>
         </div>
-        <span class="live"><i></i><span id="updated">Loading…</span></span>
-      </div>
-      <p class="eyebrow">Google Cloud · Learn With Communities</p>
-      <h1>GCLC 2026 Leaderboard</h1>
-      <p class="sub">Track your skill badges and arcade progress. Updated daily by the organizing team.</p>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <section class="stats" aria-label="Summary">
-      <div class="stat"><div class="v" id="s1">–</div><div class="k" id="s1k">Participants</div></div>
-      <div class="stat"><div class="v" id="s2">–</div><div class="k" id="s2k">Badges earned</div></div>
-      <div class="stat"><div class="v" id="s3">–</div><div class="k" id="s3k">Started</div></div>
-      <div class="stat"><div class="v" id="s4">–</div><div class="k" id="s4k">Completed</div></div>
-    </section>
-
-    <div class="notice" id="sample-note" hidden>Showing sample data. Real progress appears after the first upload.</div>
-
-    <h2 class="section-title" id="pod-title" hidden>Top performers</h2>
-    <section class="podium" id="podium" hidden></section>
-
-    <div class="controls" id="controls">
-      <label class="search">
-        <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="search" inputmode="search" enterkeyhint="search" placeholder="Search your name" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search participants">
-        <button class="clear" id="clear" type="button" aria-label="Clear search" hidden>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        <p class="eyebrow">Google Cloud · Learn With Communities</p>
+        <h1>GCLC 2026</h1>
+        <p class="sub">Earn skill badges, reach milestones, and see where you stand. Updated daily by the organizing team.</p>
+        <button class="hero-search" type="button" data-go="board" data-focus="1">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          Find your progress…
         </button>
-      </label>
-      <div class="chips" id="chips" role="group" aria-label="Filter"></div>
-      <p class="result-line" id="result-line"></p>
+      </div>
+    </header>
+
+    <main class="wrap home-body">
+      <div class="notice js-sample" hidden>Showing sample data. Real progress appears after the first upload.</div>
+
+      <div class="block" id="top-block" hidden>
+        <div class="block-head">
+          <h2>Top performers</h2>
+          <button class="link" type="button" data-go="board">See all →</button>
+        </div>
+        <div class="podium" id="podium"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-head"><h2>How it works</h2></div>
+        <ol class="steps">
+          <li><span class="n">1</span><div><b>Redeem your access code</b><p>Use the code shared by the organizers on Google Skills to start your learning path.</p></div></li>
+          <li><span class="n">2</span><div><b>Earn skill badges</b><p>Finish the labs in each skill badge. Every badge you complete counts on the leaderboard.</p></div></li>
+          <li><span class="n">3</span><div><b>Reach milestones</b><p>Milestones are reached as you complete more badges. On equal badges, the higher milestone ranks first.</p></div></li>
+        </ol>
+        <a class="cta" href="https://www.skills.google/" target="_blank" rel="noopener noreferrer">Open Google Skills
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+        </a>
+      </div>
+
+      <footer>GDG on Campus · MIT ACSC, Alandi · GCLC 2026</footer>
+    </main>
+  </section>
+
+  <!-- ================= LEADERBOARD ================= -->
+  <section class="view" id="view-board" aria-label="Leaderboard" hidden>
+    <div class="board-top">
+      <div class="wrap">
+        <div class="board-title">
+          <h1>Leaderboard</h1>
+          <span class="muted js-updated">Loading…</span>
+        </div>
+        <div class="search-row">
+          <label class="search">
+            <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" type="search" inputmode="search" enterkeyhint="search" placeholder="Search your name" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search participants">
+            <button class="clear" id="clear" type="button" aria-label="Clear search" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
+          </label>
+          <button class="filter-btn" id="filter-btn" type="button" aria-label="Filter and sort" aria-haspopup="dialog">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <span class="dot" id="filter-dot" hidden></span>
+          </button>
+        </div>
+        <p class="result-line" id="result-line"></p>
+      </div>
     </div>
 
-    <div class="status-msg" id="status" hidden></div>
-    <ol class="list" id="list" aria-live="polite">
-      <li class="skel"></li><li class="skel"></li><li class="skel"></li>
-    </ol>
-    <div class="empty" id="empty" hidden></div>
-    <div class="more" id="more" hidden><button type="button" id="more-btn">Show more</button></div>
-  </main>
+    <main class="wrap">
+      <div class="notice js-sample" hidden>Showing sample data. Real progress appears after the first upload.</div>
+      <div class="status-msg" id="status" hidden></div>
+      <ol class="board" id="list" aria-live="polite">
+        <li class="skel"></li><li class="skel"></li><li class="skel"></li><li class="skel"></li>
+      </ol>
+      <div class="empty" id="empty" hidden></div>
+      <div class="more" id="more" hidden><button type="button" id="more-btn">Show more</button></div>
+      <footer>GDG on Campus · MIT ACSC, Alandi · GCLC 2026</footer>
+    </main>
+  </section>
+
+  <!-- ================= FILTER SHEET ================= -->
+  <div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+    <div class="handle" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="sheet-title">Filter &amp; sort</h2>
+      <button class="link" type="button" id="sheet-reset">Reset</button>
+    </div>
+    <p class="sheet-label">Show</p>
+    <div class="opts" id="opt-filter" role="radiogroup" aria-label="Show"></div>
+    <p class="sheet-label">Sort by</p>
+    <div class="opts" id="opt-sort" role="radiogroup" aria-label="Sort by"></div>
+    <button class="primary" type="button" id="sheet-done">Show results</button>
+  </div>
+
+  <!-- ================= BOTTOM NAV ================= -->
+  <nav class="tabbar" aria-label="Main">
+    <button type="button" class="tab" data-go="home" aria-current="page">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+      <span>Home</span>
+    </button>
+    <button type="button" class="tab" data-go="board">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21V11H3v10zM15 21V4h-5v17zM21 21v-7h-5v7z"/></svg>
+      <span>Leaderboard</span>
+    </button>
+  </nav>
 
   <button class="totop" id="totop" type="button" aria-label="Back to top">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </button>
 
-  <footer>GDG on Campus · MIT ACSC, Alandi · GCLC 2026</footer>
-
   <script>
     // If something fails to load (bad network, old cached files), tell the visitor instead of spinning forever.
     setTimeout(function () {
-      var u = document.getElementById("updated");
+      var u = document.querySelector(".js-updated");
       if (u && u.textContent === "Loading…") {
         var s = document.getElementById("status"), l = document.getElementById("list");
         if (l) l.innerHTML = "";
-        if (s) { s.hidden = false; s.innerHTML = 'Taking longer than usual. <a href="" onclick="location.reload(true);return false">Tap to reload</a>'; }
+        if (s) { s.hidden = false; s.innerHTML = 'Taking longer than usual. <a href="" onclick="location.reload();return false">Tap to reload</a>'; }
       }
     }, 12000);
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="js/config.js?v=20261103b"></script>
-  <script src="js/csv-core.js?v=20261103b"></script>
-  <script src="js/app.js?v=20261103b"></script>
+  <script src="js/config.js?v=20261103c"></script>
+  <script src="js/csv-core.js?v=20261103c"></script>
+  <script src="js/main.js?v=20261103d"></script>
 </body>
 </html>
